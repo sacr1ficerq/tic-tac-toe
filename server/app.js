@@ -13,6 +13,8 @@ var board = [
     ['', '', ''],
 ];
 
+var player = 'X'
+
 // Enable CORS for Express (if you have HTTP routes)
 const app = express();
 app.use((req, res, next) => {
@@ -26,11 +28,24 @@ http.listen(3000, () => {
 
 socketio.on("connection", (socket) => {
     console.log("A user connected");
-    socket.emit("board", board);
+    socketio.emit("board", board);
+    socketio.emit("player", player);
     socket.on("makeMove", (x, y, player) => {
-        if (board[x][y] === '') { // Check if the cell is empty
-            board[x][y] = player; // Update the board
-            socketio.emit("board", board); // Broadcast the updated board to all clients
+        if (board[x][y] === '') {
+            board[x][y] = player;
+            player = player == 'X' ? 'O' : 'X';
+            socketio.emit("board", board);
+            socketio.emit("player", player);
         }
+    });
+    socket.on("resetGame", () => {
+        board = [
+            ['', '', ''],
+            ['', '', ''],
+            ['', '', ''],
+        ];
+        player = 'X';
+        socketio.emit("board", board);
+        socketio.emit("player", player);
     });
 });

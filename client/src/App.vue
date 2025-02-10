@@ -12,6 +12,7 @@ const board = ref([
 ])
 
 socket.on("board", data => board.value = data);
+socket.on("player", data => player.value = data);
 
 const calculateWinner = (squares) => {
   const lines = [
@@ -39,24 +40,18 @@ const makeMove = (x, y) => {
   if (winner.value) return 
   if (board.value[x][y] != '') return
   // board.value[x][[y]] = player.value
-  player.value = player.value === 'X' ? 'O' : 'X'
   socket.emit("makeMove", x, y, player.value);
 }
 
 
 const resetGame = () => {
-  player.value = 'X'
-  board.value = [
-    ['', '', ''],
-    ['', '', ''],
-    ['', '', ''],
-  ]
+  socket.emit("resetGame");
 }
 
 onMounted(() => {
   console.log("This runs when the component is mounted");
 
-    socket.emit("getBoard");
+    // socket.emit("getBoard");
 });
 
 </script>
@@ -85,7 +80,10 @@ onMounted(() => {
     </div>
 
     <h2 v-if="winner" class="text-4xl font-bold mb-8" > Player {{ winner }} wins</h2>
-
+    <button class="btn bg-red-600 focus:ring-0 focus:outline-none font-medium rounded-lg px-5 py-2.5 mb-2 text-sm hover:bg-red-700" @click="resetGame()">
+      Reset game
+    </button>
+  
   </main>
 </template>
 
