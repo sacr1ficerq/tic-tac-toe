@@ -1,11 +1,17 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import io from "socket.io-client"
+
+const socket = io("http://localhost:3000");
+
 const player = ref('X')
 const board = ref([
   ['', '', ''],
   ['', '', ''],
   ['', '', ''],
 ])
+
+socket.on("board", data => board.value = data);
 
 const calculateWinner = (squares) => {
   const lines = [
@@ -32,8 +38,9 @@ const winner = computed(() => calculateWinner(board.value.flat()))
 const makeMove = (x, y) => {
   if (winner.value) return 
   if (board.value[x][y] != '') return
-  board.value[x][[y]] = player.value
+  // board.value[x][[y]] = player.value
   player.value = player.value === 'X' ? 'O' : 'X'
+  socket.emit("makeMove", x, y, player.value);
 }
 
 
@@ -45,6 +52,12 @@ const resetGame = () => {
     ['', '', ''],
   ]
 }
+
+onMounted(() => {
+  console.log("This runs when the component is mounted");
+
+    socket.emit("getBoard");
+});
 
 </script>
 
